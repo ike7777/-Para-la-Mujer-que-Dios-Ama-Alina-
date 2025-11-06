@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un Detalle para Ti</title>
+    
+    <!-- Cargamos Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Cargamos las fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:ital,wght@0,400;1,700&display=swap" rel="stylesheet">
+    
+    <!-- SCRIPT PARA EL CONFETI (ESTRELLITAS Y COHETES) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Fondo de "florecitas" hecho con código (SVG) */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url("data:image/svg+xml,%3Csvg%20width='25'%20height='25'%20viewBox='0%200%20100%20100'%20xmlns='http://www.w3.org/2000/svg'%3E%3Cpath%20d='M%2050%200%20L%2060%2040%20L%20100%2050%20L%2060%2060%20L%2050%20100%20L%2040%2060%20L%200%2050%20L%2040%2040%20Z'%20fill='%23F9A8D4'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 40px 40px;
+            background-attachment: fixed;
+            background-color: #FEF2F2;
+        }
+        .font-serif {
+            font-family: 'Merriweather', serif;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Animación de balanceo fuerte */
+        @keyframes anxious-shake {
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(-5deg); }
+            40% { transform: rotate(5deg); }
+            60% { transform: rotate(-5deg); }
+            80% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
+        }
+        .animate-anxious-shake {
+            animation: anxious-shake 0.8s cubic-bezier(.36,.07,.19,.97) infinite;
+            transform-origin: center;
+        }
+
+        /* Estilo para el sobre (carta cerrada) */
+        .envelope {
+            position: relative;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 3rem 2rem 2rem 2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 380px;
+            width: 90%;
+            aspect-ratio: 4 / 3;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align: center;
+            overflow: hidden;
+        }
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to bottom right, #f8f8f8 50%, transparent 50%);
+            background-size: 100% 120px;
+            background-repeat: no-repeat;
+            background-position: top;
+            border-bottom: 1px solid #e0e0e0;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            z-index: 1;
+            transform: translateY(-1px);
+        }
+        .seal {
+            position: absolute;
+            bottom: 20px;
+            width: 50px;
+            height: 50px;
+            background-color: #EF4444;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+        .seal::before, .seal::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: inherit;
+            border-radius: 50%;
+        }
+        .seal::before { left: -50%; top: 0; }
+        .seal::after { top: -50%; left: 0; }
+        .seal { transform: rotate(-45deg); }
+        .seal-text {
+            transform: rotate(45deg);
+            font-weight: bold;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+        
+        /* Estilos para los botones de elección (Regalos y Valores) */
+        .choice-option {
+            background-color: #fff;
+            border: 2px solid #FBCFE8;
+            border-radius: 12px;
+            padding: 1rem; /* Reducido un poco para la cuadrícula 2x2 */
+            margin-bottom: 0; /* Ya no es necesario con la cuadrícula */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-height: 130px; /* Alto mínimo para que se vean parejos */
+            justify-content: center;
+        }
+        .choice-option:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #F472B6;
+        }
+        .choice-icon {
+            font-size: 2.5rem; /* Ligeramente más pequeño para la cuadrícula */
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- =========== 1. PANTALLA DE PORTADA (LA "CARTITA") =========== -->
+    <div id="coverPage" class="flex items-center justify-center min-h-screen p-6">
+        <div class="envelope animate-anxious-shake"> 
+
+            <h1 class="font-bold text-3xl text-rose-800 mb-6 text-center z-10">
+                Una carta para Alina
+            </h1>
+            
+            <div class="seal">
+                <span class="seal-text">❤</span> 
+            </div>
+
+            <button id="openButton" class="w-11/12 bg-rose-600 text-white font-bold text-lg py-3 px-6 rounded-xl shadow-lg hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-opacity-75 transition-transform transform hover:scale-105 mt-8 z-10">
+                Tocar para abrir
+            </button>
+        </div>
+    </div>
+
+    <!-- =========== 2. PANTALLA DE ELECCIÓN DE REGALOS (INTERACCIÓN 2) - ¡NUEVA! =========== -->
+    <div id="giftChoicePage" style="display: none;" class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 mx-auto">
+            <h2 class="font-bold text-3xl text-rose-800 mb-8">
+                Ok, primera pregunta... ¿Qué prefieres?
+            </h2>
+            <!-- Cuadrícula 2x2 para las 4 opciones -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="choice-option" data-choice="chocolates">
+                    <span class="choice-icon">🍫</span>
+                    <p class="font-semibold text-lg text-rose-700">Chocolates</p>
+                </div>
+                <div class="choice-option" data-choice="peluches">
+                    <span class="choice-icon">🧸</span>
+                    <p class="font-semibold text-lg text-rose-700">Peluches</p>
+                </div>
+                <div class="choice-option" data-choice="flores">
+                    <span class="choice-icon">💐</span>
+                    <p class="font-semibold text-lg text-rose-700">Flores</p>
+                </div>
+                <div class="choice-option" data-choice="all">
+                    <span class="choice-icon">🎁</span>
+                    <p class="font-semibold text-lg text-rose-700">Todas las anteriores</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========== 3. PANTALLA DE ELECCIÓN DE VALORES (INTERACCIÓN 3) =========== -->
+    <div id="valueChoicePage" style="display: none;" class="min-h-screen flex flex-col items-center justify-center p-6 text-center">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 mx-auto">
+            <h2 class="font-bold text-3xl text-rose-800 mb-4">
+                Un último paso...
+            </h2>
+            <p class="text-gray-600 text-lg mb-8">¿Qué valor es más importante para ti hoy?</p>
+            <!-- Cuadrícula 1x3 para estas opciones -->
+            <div class="grid grid-cols-1 gap-4">
+                <div class="choice-option" data-choice="faith">
+                    <span class="choice-icon">🕊️</span>
+                    <p class="font-semibold text-xl text-rose-700">Fe</p>
+                </div>
+                <div class="choice-option" data-choice="peace">
+                    <span class="choice-icon">🌿</span>
+                    <p class="font-semibold text-xl text-rose-700">Paz</p>
+                </div>
+                <div class="choice-option" data-choice="love">
+                    <span class="choice-icon">❤️</span>
+                    <p class="font-semibold text-xl text-rose-700">Amor</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========== 4. PANTALLA FINAL (EL MENSAJE) =========== -->
+    <div id="finalPage" style="display: none;" class="min-h-screen flex flex-col items-center justify-center p-6">
+        
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden my-8 mx-auto p-10 text-center">
+            
+            <h1 class="font-serif font-bold text-5xl text-rose-800 tracking-tight" style="line-height: 1.2;">
+                ¡Dios te bendiga, Alina!
+            </h1>
+            
+            <p class="text-right font-bold text-xl text-gray-800 mt-16" style="font-family: 'Merriweather', serif;">
+                Con mucho cariño,
+            </p>
+            <p class="text-right font-bold text-2xl text-rose-800 mt-1" style="font-family: 'Merriweather', serif;">
+                Enrique Vera
+            </p>
+
+        </div>
+    </div>
+    
+    <script>
+        // Obtenemos todas las "páginas"
+        const coverPage = document.getElementById('coverPage');
+        const giftChoicePage = document.getElementById('giftChoicePage'); // ¡Actualizado!
+        const valueChoicePage = document.getElementById('valueChoicePage');
+        const finalPage = document.getElementById('finalPage');
+
+        // Obtenemos los botones
+        const openButton = document.getElementById('openButton');
+        const giftOptions = document.querySelectorAll('#giftChoicePage .choice-option'); // ¡Actualizado!
+        const valueOptions = document.querySelectorAll('#valueChoicePage .choice-option');
+
+        // Función para el primer confeti (Estrellas)
+        function launchStars() {
+            confetti({
+                particleCount: 150,
+                spread: 180,
+                origin: { y: 0.6 },
+                shapes: ['star'], // ¡Estrellas!
+                colors: ['#FFC0CB', '#FFD700', '#FFFFFF', '#E0BBE4', '#F472B6']
+            });
+        }
+
+        // Función para el segundo confeti (Cohetes/Aniversario)
+        function launchFireworks() {
+            confetti({
+                particleCount: 300,
+                spread: 200,
+                origin: { y: 0.6 },
+                colors: ['#FFC0CB', '#FFD700', '#FFFFFF', '#E0BBE4', '#F472B6']
+            });
+            setTimeout(() => {
+                confetti({
+                    particleCount: 100,
+                    spread: 120,
+                    origin: { y: 0.5 },
+                    colors: ['#FFC0CB', '#FFD700', '#FFFFFF']
+                });
+            }, 300);
+        }
+
+        // ---- SECUENCIA DE EVENTOS ----
+
+        // 1. Al hacer clic en "Abrir"
+        openButton.addEventListener('click', () => {
+            launchStars(); // Lanza las estrellas
+            coverPage.style.display = 'none';
+            giftChoicePage.style.display = 'flex'; // Muestra la página de regalos
+            window.scrollTo(0, 0); 
+        });
+
+        // 2. Al hacer clic en un Regalo
+        giftOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                giftChoicePage.style.display = 'none'; // Oculta la página de regalos
+                valueChoicePage.style.display = 'flex'; // Muestra la página de valores
+                window.scrollTo(0, 0); 
+            });
+        });
+
+        // 3. Al hacer clic en un Valor
+        valueOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                launchFireworks(); // ¡Lanza los cohetes!
+                valueChoicePage.style.display = 'none';
+                finalPage.style.display = 'flex';
+                window.scrollTo(0, 0); 
+            });
+        });
+    </script>
+
+</body>
+</html>
